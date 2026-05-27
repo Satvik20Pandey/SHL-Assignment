@@ -1,7 +1,7 @@
 from app.agent.orchestrator import AgentOrchestrator
 from app.catalog.loader import load_catalog_from_file
 from app.config import settings
-from app.retrieval.index import build_search_index
+from app.retrieval.index import get_or_build_search_index
 
 _agent: AgentOrchestrator | None = None
 
@@ -21,5 +21,5 @@ def _init_agent() -> AgentOrchestrator:
     for item in catalog:
         by_url[item.url.rstrip("/")] = item
         by_url[item.url] = item
-    search = build_search_index(catalog, settings.index_cache_dir)
+    search = get_or_build_search_index(catalog, settings.index_cache_dir)
     return AgentOrchestrator(catalog, search, by_url)

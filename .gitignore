@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 .pytest_cache/
 data/index_cache/
+data/hf_cache/
 .DS_Store
 # parent-level sample conversations (for local eval only)
 ../sample_conversations/

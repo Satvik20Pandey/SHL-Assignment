@@ -15,7 +15,7 @@ Stateless FastAPI service that recommends SHL **Individual Test Solutions** thro
 cd shl-assessment-recommender
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 copy .env.example .env
 ```
 
@@ -59,7 +59,8 @@ python eval\run_eval.py
    - `POST /chat` returns valid assignment schema
 
 Notes:
-- First cold start can be slower because embeddings/index initialize.
+- Docker build pre-bakes catalog + FAISS index + embedding model (fits Render free tier RAM).
+- First `/health` may still take ~30–90s while the model loads from disk.
 - Keep the service warm before submission if using free tier.
 
 ## Submission checklist
