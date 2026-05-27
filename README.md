@@ -1,15 +1,32 @@
 # SHL Conversational Assessment Recommender
 
-Stateless FastAPI service that recommends SHL **Individual Test Solutions** through multi-turn dialogue, grounded in the official catalog.
+FastAPI service that recommends SHL **Individual Test Solutions** through stateless multi-turn dialogue.  
+Live API: `https://shl-assignment-s3kp.onrender.com`
 
-## API (assignment schema)
+## Endpoints
 
-| Endpoint | Response |
-|----------|----------|
-| `GET /health` | `{"status": "ok"}` |
-| `POST /chat` | `reply`, `recommendations` (0–10), `end_of_conversation` |
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/health` | Readiness check → `{"status":"ok"}` |
+| POST | `/chat` | Next agent reply + optional recommendations |
 
-## Local setup
+`POST /chat` body:
+
+```json
+{
+  "messages": [
+    {"role": "user", "content": "Hiring a Java developer"},
+    {"role": "assistant", "content": "What seniority level?"},
+    {"role": "user", "content": "Mid-level, around 4 years"}
+  ]
+}
+```
+
+Response fields: `reply`, `recommendations` (0–10), `end_of_conversation`.
+
+Note: the root URL `/` returns 404 by design. Evaluators should use `/health` and `/chat`.
+
+## Local run
 
 ```powershell
 cd shl-assessment-recommender
@@ -19,7 +36,7 @@ pip install -r requirements-dev.txt
 copy .env.example .env
 ```
 
-Edit `.env`:
+Set in `.env`:
 
 ```env
 ANTHROPIC_API_KEY=sk-ant-...
@@ -28,56 +45,44 @@ ANTHROPIC_MODEL=claude-sonnet-4-20250514
 
 ```powershell
 python scripts\build_catalog.py
+python scripts\build_index_cache.py
 uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-First start loads the embedding index (~30–60s). Then test:
+Test:
 
 ```powershell
 curl http://127.0.0.1:8000/health
+python eval\replay.py --url http://127.0.0.1:8000
 ```
 
-## Evaluation
+## Project layout
 
-```powershell
-python eval\replay.py --url http://127.0.0.1:8000
-python eval\run_eval.py
+```
+app/                 API, agent, catalog, retrieval
+data/                catalog.json + baked index cache (Docker build)
+eval/                Recall@10 replay scripts
+docs/                approach.pdf (submission write-up)
+scripts/             catalog/index build utilities
+Dockerfile           Render deployment
 ```
 
 ## Deploy on Render
 
-1. Push this project folder to GitHub.
-2. In Render, create a **Web Service** and connect the repo.
-3. Use **Docker** runtime (the included `Dockerfile` is used automatically).
-4. Add environment variables:
-   - `ANTHROPIC_API_KEY` = your Anthropic key
-   - `ANTHROPIC_MODEL` = `claude-sonnet-4-20250514`
-5. Ensure health check path is `/health`.
-6. Deploy and wait for the build to complete.
-7. Verify:
-   - `GET /health` returns `{"status":"ok"}`
-   - `POST /chat` returns valid assignment schema
+1. Connect GitHub repo to a Render Web Service (Docker).
+2. Set env vars: `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-4-20250514`.
+3. Health check path: `/health`.
+4. After deploy, verify `/health` and a sample `/chat` call.
 
-Notes:
-- Docker build pre-bakes catalog + FAISS index + embedding model (fits Render free tier RAM).
-- First `/health` may still take ~30–90s while the model loads from disk.
-- Keep the service warm before submission if using free tier.
+Docker pre-builds the catalog and FAISS index so the free tier can start without OOM.
 
-## Submission checklist
+## Submission (SHL form)
 
-- [ ] GitHub repo contains `shl-assessment-recommender/` (not PDFs or `.env`)
-- [ ] Render service live; `/health` and `/chat` public
-- [ ] `ANTHROPIC_API_KEY` set on Render
-- [ ] Submit API URL + `docs/approach.md` via SHL form
+- **API URL:** `https://shl-assignment-s3kp.onrender.com`
+- **Approach document:** `docs/approach.pdf` (2 pages, by Satvik Pandey)
 
-## Layout
+The assignment asks for an approach document (max 2 pages); PDF is acceptable and included in the repo.
 
-```
-app/          API, agent, catalog, retrieval
-data/         catalog.json (370 items)
-eval/         Recall@10, replay
-docs/         approach.md (≤2 pages)
-Dockerfile    production image
-```
+## Author
 
-Sample conversations for eval live in `../sample_conversations/` (reference only).
+Satvik Pandey
