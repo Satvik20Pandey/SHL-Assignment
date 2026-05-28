@@ -12,7 +12,7 @@ class ApproachPDF(FPDF):
     def footer(self):
         self.set_y(-12)
         self.set_font("Helvetica", "I", 8)
-        self.cell(0, 8, f"Page {self.page_no()}", align="C")
+        self.cell(0, 8, f"{self.page_no()}", align="C")
 
 
 def add_heading(pdf: ApproachPDF, text: str) -> None:
@@ -84,16 +84,16 @@ def build_pdf() -> None:
     pdf.add_page()
     pdf.set_margins(18, 18, 18)
 
-    pdf.set_font("Helvetica", "", 10)
-    pdf.cell(0, 5, "By Satvik Pandey", new_x="LMARGIN", new_y="NEXT")
-    pdf.ln(2)
     pdf.set_font("Helvetica", "B", 14)
-    pdf.multi_cell(0, 7, "Approach Document\nSHL Conversational Assessment Recommender")
-    pdf.ln(4)
+    pdf.multi_cell(0, 7, "Approach Document\nSHL Conversational Assessment Recommender", align="C")
+    pdf.ln(2)
+    pdf.set_font("Helvetica", "", 10)
+    pdf.cell(0, 5, "By Satvik Pandey", new_x="LMARGIN", new_y="NEXT", align="R")
+    pdf.ln(2)
 
     add_body(
         pdf,
-        "This document summarises my implementation of a stateless FastAPI conversational recommender "
+        "I have implemented a stateless FastAPI conversational recommender "
         "for SHL Individual Test Solutions. The service accepts full chat history per request and returns "
         "a grounded shortlist (1-10 assessments) with validated catalog URLs only.",
     )
@@ -148,12 +148,9 @@ def build_pdf() -> None:
     # Start page 2 for concise, interview-friendly summary.
     pdf.add_page()
     pdf.set_margins(18, 18, 18)
-    pdf.set_font("Helvetica", "", 10)
-    pdf.cell(0, 5, "By Satvik Pandey", new_x="LMARGIN", new_y="NEXT")
+    pdf.set_font("Helvetica", "B", 12)
+    pdf.cell(0, 7, "Approach Summary", new_x="LMARGIN", new_y="NEXT")
     pdf.ln(1)
-    pdf.set_font("Helvetica", "B", 13)
-    pdf.cell(0, 7, "Approach Summary (Page 2)", new_x="LMARGIN", new_y="NEXT")
-    pdf.ln(2)
 
     add_heading(pdf, "6) What did not work")
     add_body(
