@@ -75,6 +75,7 @@ Dockerfile           Render deployment
 4. After deploy, verify `/health` and a sample `/chat` call.
 
 Docker pre-builds the catalog and FAISS index so the free tier can start without OOM.
+Additionally, `.github/workflows/keep-warm.yml` pings `/health` and a lightweight `/chat` every 10 minutes to reduce free-tier cold-start sleeps.
 
 ## Submission (SHL form)
 
